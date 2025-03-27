@@ -12,11 +12,11 @@ templogicdata =  [
 def test_stl(tlStr):
     print(tlStr)
     try:
-        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "udacityData")
+        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "tests/udacityData")
     except ValueError:
-        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "udacityData", "nogradient")
+        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "tests/udacityData", "nogradient")
     print(" Synthesized STL formula: {}\n Theta Optimal Value: {}\n Optimization time: {}\n".format(stlsyn, value, dur))
-    (bres, qres) = telex.synth.verifySTL(stlsyn, "udacityData")
+    (bres, qres) = telex.synth.verifySTL(stlsyn, "tests/udacityData")
     print(" Test result of synthesized STL on each trace: {}\n Robustness Metric Value: {}\n".format(bres, qres))
 #    print(tlStr)
 #    (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "traces")

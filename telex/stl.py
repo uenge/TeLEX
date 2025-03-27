@@ -133,7 +133,7 @@ class Future(namedtuple('F',['interval','subformula'])):
 
 class Until(namedtuple('U',['interval','left', 'right'])):
     def children(self):
-        return [self.left, self,right]
+        return [self.left, self.right]
     def __repr__(self):
         return "U{}{}{}".format(self.interval, self.left, self.right)
 

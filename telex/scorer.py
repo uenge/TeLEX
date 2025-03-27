@@ -179,6 +179,8 @@ def smartscore(stl, x, t):
 @smartscore.register(Globally)
 def _(stl, x, t):
     (left, right) = stl.interval
+    if left>right:
+        raise ValueError("Interval [{},{}] empty for {}".format(left, right, stl))    
     intervalwidth = right - left + 1
     (maxtime, rangetime) = gettime(x, t+left, t+right)
     #rangetime =  x[(x['time'] <= right) & (x['time'] >= left)]["time"]
@@ -187,6 +189,8 @@ def _(stl, x, t):
 @smartscore.register(Future)
 def _(stl, x, t):
     (left, right) = stl.interval
+    if left>right:
+        raise ValueError("Interval [{},{}] empty for {}".format(left, right, stl))    
     intervalwidth = right - left + 1
     (maxtime, rangetime) = gettime(x, t+left, t+right)
     return  2/(1 + math.exp(0.01 * intervalwidth) ) * max(smartscore(stl.subformula, x, t1) for t1 in rangetime)
@@ -194,8 +198,8 @@ def _(stl, x, t):
 @smartscore.register(Until)
 def _(stl, x, t):
     (left, right) = stl.interval
-    left = float(left) 
-    right = float(right) 
+    # left = float(left) 
+    # right = float(right) 
     if left>right:
         raise ValueError("Interval [{},{}] empty for {}".format(left, right, stl))    
     intervalwidth = right - left + 1
@@ -209,6 +213,10 @@ def _(stl, x, t):
     #    print(filter(lambda v: (v>= t) & (v<= t1) , rangetime) )
     #    print(min (qualitativescore(stl.left, x, t2) for t2 in filter(lambda v: (v>= t) & (v< t1) , rangetime) ) )
     return 2/(1 + math.exp(-0.01 * intervalwidth) ) * max(quantitativescore(stl.right, x, t), max( min (quantitativescore(stl.right, x, t1), min (quantitativescore(stl.left, x, t2) for t2 in filter(lambda v: (v>= t) & (v<= t1) , rangetime) ) ) for t1 in rangetime) )
+
+
+
+
 
 
 @smartscore.register(Or)
@@ -254,5 +262,5 @@ def _(stl, x, t):
 def gettime(x, left, right):
     ts = sorted(x['time'].keys())
     maxtime = ts[-1]
-    rangetime = filter(lambda v: (v<= right) & (v >= left), ts)
+    rangetime = list(filter(lambda v: (v<= right) & (v >= left), ts))
     return maxtime, rangetime

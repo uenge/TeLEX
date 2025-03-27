@@ -7,7 +7,7 @@ import numpy as np
 import scipy.optimize 
 from random import uniform
 import logging
-from time import clock
+import time
 import os 
 
 
@@ -67,7 +67,7 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
     uniform_tuple = lambda t: uniform(*t)
     for prm in prmlist:
         boundlist.append((float(prm.left),float(prm.right)))
-    start = clock()
+    start = time.perf_counter()
     costfunc = lambda paramval : -1*cumscoretracelist(stl,paramval,tracelist,scorefun)
     done = False
     attempts = 0
@@ -80,7 +80,7 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
         if optmethod == "nogradient":
             res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol)
         else:
-            res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,options=options)
+            res = scipy.optimize.minimize(costfunc, list(initguess), bounds=boundlist,options=options)
 
         '''
         if optmethod == 'HYBRID':
@@ -115,7 +115,7 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
     for prm in prmlist:
         pvalue[prm.name] = x_out[i]
         i = i + 1
-    return (pvalue, mvalue, clock()-start)
+    return (pvalue, mvalue, time.perf_counter()-start)
 
 
 
@@ -138,7 +138,7 @@ def bayesoptimize(stl, tracelist, iter_learn, iter_relearn, init_samples, mode, 
         lb[i] = float(prm.left)
         ub[i] = float(prm.right)
         i = i +1 
-    start = clock()
+    start = time.perf_counter()
     costfunc = lambda paramval : -1*cumscoretracelist(stl,paramval,tracelist,scorer.smartscore)
     if mode == "discrete":
         steps = steps + 1
@@ -152,7 +152,7 @@ def bayesoptimize(stl, tracelist, iter_learn, iter_relearn, init_samples, mode, 
         attempts = 0
         while not done:
             attempts = attempts + 1
-            print "Attempt: {}".format(attempts)
+            print("Attempt: {}".format(attempts))
             if attempts >= NumAttempts:
                 done = True
             try:
@@ -160,10 +160,10 @@ def bayesoptimize(stl, tracelist, iter_learn, iter_relearn, init_samples, mode, 
                 if mvalue < 0:
                     done = True
                 else:
-                    print "Min cost is positive: {}".format(mvalue)
+                    print("Min cost is positive: {}".format(mvalue))
 
             except RuntimeError:
-                print "Runtime error"
+                print("Runtime error")
                 #raise ValueError("Template {} could not be completed. Rerun to try again. Bayesian optimization experienced a nondeterministic (nonpersistent) runtime numerical error.".format(stl))
 
     elif mode == "continuous":
@@ -171,7 +171,7 @@ def bayesoptimize(stl, tracelist, iter_learn, iter_relearn, init_samples, mode, 
         attempts = 0
         while not done:
             attempts = attempts + 1
-            print "Attempt: {}".format(attempts)
+            print("Attempt: {}".format(attempts))
             if attempts >= NumAttempts:
                 done = True
             try:
@@ -179,14 +179,14 @@ def bayesoptimize(stl, tracelist, iter_learn, iter_relearn, init_samples, mode, 
                 if mvalue < 0:
                     done = True
                 else:
-                    print "Min cost is positive: {}".format(mvalue)
+                    print("Min cost is positive: {}".format(mvalue))
             except RuntimeError:
-                print "Runtime error"
+                print("Runtime error")
                 #raise ValueError("Template {} could not be completed. Rerun to try again. Bayesian optimization experienced a nondeterministic (nonpersistent) runtime numerical error.".format(stl))
         
     #print "Final cost is", mvalue, " at ", x_out
-    #print "Synthesis time:", clock() - start, "seconds"
-    return (x_out, mvalue, clock()-start)
+    #print "Synthesis time:", time.perf_counter() - start, "seconds"
+    return (x_out, mvalue, time.perf_counter()-start)
 
 
 def stretchsearch(prm, lbound, ubound, costfunc, pvalue_mut, decinc):
@@ -320,7 +320,7 @@ def synthSTLParam(tlStr, tracedir, optmethod="gradient", tol = 1e-1):
 
 def verifySTL(stlex, tracedir):
     #param = parametrizer.getParams(stlex) -- add check that this is empty list
-    #logging.debug("Testing STL: {} on trajectories in {} ", stlex, tracedir)
+    logging.debug("Testing STL: {} on trajectories in {} ", stlex, tracedir)
     tracenamelist = find_filenames (tracedir, suffix=".csv")
     tracelist = []
     for tracename in tracenamelist:

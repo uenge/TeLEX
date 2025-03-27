@@ -47,7 +47,7 @@ def test_stl(tlStr):
     #print(stl)
     print(stl1)
     #x = pandas.DataFrame([[1,2, True], [1,4, True], [4,2, False], [1,2, True], [1,4, True], [4,2, False], [1,2, True], [1,4, True], [4,2, False], [4,2, False]], index=[0,1,2,3,4,5,6,7,8,9], columns=["x1", "x2", "x3"])
-    x = inputreader.readtracefile("traces/trace2.csv")
+    x = inputreader.readtracefile("tests/traces/trace2.csv")
     try:
         boolscore = qualitativescore(stl1, x, 0)
         print(boolscore)

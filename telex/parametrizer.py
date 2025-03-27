@@ -40,19 +40,21 @@ def getParamsDir(stl, dir):
     else:
         return NotImplementedError
 
-
+def ordered_union(ls):
+    seen = set()
+    return[x for x in ls if  x not in seen and not seen.add(x)]
 
 def getParams(stl):
     if isinstance(stl, (Globally, Future)):
-        return list(set().union(getParams(stl.interval), getParams(stl.subformula)))
+        return [x for x in set().union(getParams(stl.interval), getParams(stl.subformula)) if x]
     if isinstance(stl, Until):
-        return list(set().union(getParams(stl.interval), getParams(stl.left), getParams(stl.right)))
+        return [x for x in set().union(getParams(stl.interval), getParams(stl.left), getParams(stl.right)) if x]
     elif isinstance(stl, (Interval, Or, And, Implies, Expr)):
-        return list(set().union(getParams(stl.left), getParams(stl.right)))
+        return getParams(stl.left) + getParams(stl.right) ## removed se union to keep order
     elif isinstance(stl,Not):
         return getParams(stl.subformula)
     elif isinstance(stl, Constraint):
-        return list(set().union(getParams(stl.term), getParams(stl.bound)))
+        return [x for x in set().union(getParams(stl.term), getParams(stl.bound)) if x]
     elif isinstance(stl, (Atom, Var)):
         return []
     elif isinstance(stl, Param):

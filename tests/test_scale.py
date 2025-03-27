@@ -28,9 +28,9 @@ templogicdata =  [
 @pytest.mark.parametrize("tlStr", templogicdata)
 def test_stl(tlStr, optmethod = "gradient"):
     print(tlStr)
-    (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "scale", optmethod)
+    (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "tests/scale", optmethod)
     print(" Synthesized STL formula: {}\n Theta Optimal Value: {}\n Optimization time: {}\n".format(stlsyn, value, dur))
-    (bres, qres) = telex.synth.verifySTL(stlsyn, "scale")
+    (bres, qres) = telex.synth.verifySTL(stlsyn, "tests/scale")
     print(" Test result of synthesized STL on each trace: {}\n Robustness Metric Value: {}\n".format(bres, qres))
     return stlsyn,value,dur
  
@@ -43,12 +43,12 @@ def main(argv):
     try: 
         opts,args = getopt.getopt(argv, "hi:o:",["itercount=","optmethod="])
     except getopt.GetoptError:
-        print 'python test_scale.py -i <number of times to iterate each synthesis task to compute mean runtime> -o <opt-method>' 
+        print ('python test_scale.py -i <number of times to iterate each synthesis task to compute mean runtime> -o <opt-method>' )
         sys.exit(2)
     for opt,arg in opts:
         if opt == '-h':
-            print 'python test_scale.py -i <number of times to iterate each synthesis task to compute mean runtime> -o <opt-method>'
-            print 'Valid opt-methods: \"gradient\", \"nogradient\"'
+            print ('python test_scale.py -i <number of times to iterate each synthesis task to compute mean runtime> -o <opt-method>')
+            print ('Valid opt-methods: \"gradient\", \"nogradient\"')            
             sys.exit()
         elif opt in ("-i", "--itercount"):
             itercount = int(arg)

@@ -30,12 +30,12 @@ def test_stl(tlStr):
     #exit()
 
     try:
-        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "surv")
+        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "tests/surv")
     except ValueError:
         print('Error: Check bounds')
-        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "surv", "nogradient")
+        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "tests/surv", "nogradient")
     print(" Synthesized STL formula: {}\n Theta Optimal Value: {}\n Optimization time: {}\n".format(stlsyn, value, dur))
-    (bres, qres) = telex.synth.verifySTL(stlsyn, "surv")
+    (bres, qres) = telex.synth.verifySTL(stlsyn, "tests/surv")
     print(" Test result of synthesized STL on each trace: {}\n Robustness Metric Value: {}\n".format(bres, qres))
 #    print(tlStr)
 #    (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "traces")

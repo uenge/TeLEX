@@ -1,6 +1,7 @@
 import pytest
 import telex.synth
 import pandas
+import os
 
 #templogicdata =  'G[0,6] F[b? 1;6,  a? 4;6](x1 > 2)'
 templogicdata =  [
@@ -18,12 +19,13 @@ templogicdata =  [
 @pytest.mark.parametrize("tlStr", templogicdata)
 def test_stl(tlStr):
     print(tlStr)
+    trace_path = "tests/traces"
     try:
-        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "traces")
+        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, trace_path)
     except ValueError:
-        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "traces", "nogradient")
+        (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, trace_path, "nogradient")
     print(" Synthesized STL formula: {}\n Theta Optimal Value: {}\n Optimization time: {}\n".format(stlsyn, value, dur))
-    (bres, qres) = telex.synth.verifySTL(stlsyn, "traces")
+    (bres, qres) = telex.synth.verifySTL(stlsyn, trace_path)
     print(" Test result of synthesized STL on each trace: {}\n Robustness Metric Value: {}\n".format(bres, qres))
 #    print(tlStr)
 #    (stlsyn, value, dur) = telex.synth.synthSTLParam(tlStr, "traces")
