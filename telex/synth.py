@@ -68,6 +68,8 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
     for prm in prmlist:
         boundlist.append((float(prm.left),float(prm.right)))
     start = time.perf_counter()
+
+    # *-1 for min problem
     costfunc = lambda paramval : -1*cumscoretracelist(stl,paramval,tracelist,scorefun)
     done = False
     attempts = 0
@@ -79,11 +81,9 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
         attempts = attempts + 1
         if optmethod == "nogradient":
             res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol)
-        else:
-            res = scipy.optimize.minimize(costfunc, list(initguess), bounds=boundlist,options=options)
-
-        '''
-        if optmethod == 'HYBRID':
+        elif optmethod == "dualannealing":
+            res = scipy.optimize.dual_annealing(costfunc, bounds=boundlist)
+        elif optmethod == 'HYBRID':
             if attempts % 2 == 0:
                 res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,method='L-BFGS-B',options=options)
             else:
@@ -92,7 +92,6 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
             res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol)
         else:
             res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,method=optmethod,options=options)
-        '''
 
         logging.debug("Attempt : {} with Cost: {}/{} Param: {}".format(attempts, res.fun, bestCost, res.x))
         if res.fun > 1.01* bestCost and res.fun < 0.99 * bestCost:
@@ -139,6 +138,7 @@ def bayesoptimize(stl, tracelist, iter_learn, iter_relearn, init_samples, mode, 
         ub[i] = float(prm.right)
         i = i +1 
     start = time.perf_counter()
+    # *-1 for min problem
     costfunc = lambda paramval : -1*cumscoretracelist(stl,paramval,tracelist,scorer.smartscore)
     if mode == "discrete":
         steps = steps + 1
