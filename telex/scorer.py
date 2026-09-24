@@ -242,15 +242,10 @@ robusttable = { "<" : lambda x,y: y-x, "<=" : lambda x,y: y-x, ">" : lambda x,y:
 
 @smartscore.register(Constraint)
 def _(stl, x, t):
-    rawscore = robusttable[stl.relop](getval(stl.term, x, t), getval(stl.bound, x, t))
-    
-    #randomscorefun = randint(1,3)
-    #if randomscorefun == 1:
-    #return -0.6+1/(rawscore -1 + math.exp(-rawscore+1))
-    #elif randomscorefun == 2:
-    return 1/(rawscore + math.exp(-1*rawscore)) - math.exp(-1*rawscore) 
-    #else :
-    #    return rawscore*math.exp(1-rawscore)
+    alpha = 50 # scales the width and x-value of the peak
+    beta = 4 # scales the height of the peak
+    rawscore = (robusttable[stl.relop](getval(stl.term, x, t), getval(stl.bound, x, t)))
+    return 1/(alpha*rawscore + math.exp(-beta*alpha*rawscore)) - math.exp(-alpha*rawscore) 
 
 @smartscore.register(Atom)
 def _(stl, x, t):
