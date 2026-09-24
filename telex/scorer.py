@@ -21,7 +21,7 @@ def _(stl, x, t):
     right = float(right)  
     if left>right:
         raise ValueError("Interval [{},{}] empty for {}".format(left, right, stl))
-    (maxtime, rangetime) = gettime(x, t+left, t+right)
+    (_, rangetime) = gettime(x, t+left, t+right)
     return all(qualitativescore(stl.subformula, x, t1) for t1 in rangetime)
 
 
@@ -97,8 +97,6 @@ def _(term, x, t):
 def _(term, x, t):
     raise NotImplementedError("No getval for parameter {}".format(term))
 
-
-
 @singledispatch
 def quantitativescore(stl, x, t):
     raise NotImplementedError("No quantitativescore for {} of class {}".format(stl, stl.__class__))
@@ -123,14 +121,7 @@ def _(stl, x, t):
     if left>right:
         print(left, right, "until q score")
         raise ValueError("Interval [{},{}] empty for {}".format(left, right, stl))    
-    (maxtime, rangetime) = gettime(x, t+left, t+right)
-    #rangetime = filter(lambda v: (v<= right) & (v >= left), ts)
-    #for t1 in rangetime:
-    #    print(" t1 ", t1, quantitativescore(stl.right,x,t1))
-    #    for t2 in filter(lambda v: (v>= t) & (v<= t+t1) , rangetime):
-    #        print("   t2  ", t2, stl.left, quantitativescore(stl.left, x, t2) )
-    #    print(filter(lambda v: (v>= t) & (v<= t1) , rangetime) )
-    #    print(min (qualitativescore(stl.left, x, t2) for t2 in filter(lambda v: (v>= t) & (v< t1) , rangetime) ) )
+    (_, rangetime) = gettime(x, t+left, t+right)
     return max(quantitativescore(stl.right, x, t), 
                max( min (quantitativescore(stl.right, x, t1), 
                     min (quantitativescore(stl.left, x, t2) for t2 in filter(lambda v: (v>= t) & (v<= t1) , rangetime) ) ) for t1 in rangetime
@@ -155,13 +146,10 @@ def _(stl, x, t):
 def _(stl, x, t):
     return -1 * quantitativescore(stl.subformula, x, t)
 
-#optable = { "<" : op.lt, ">" : op.gt, "<=" : op.le, ">=" : op.ge, "==": op.eq, "+" : op.add, "-" : op.sub, "*" : op.mul, "/" : op.truediv }
-
 robusttable = { "<" : lambda x,y: y-x, "<=" : lambda x,y: y-x, ">" : lambda x,y: x-y , ">=": lambda x,y: x-y, "==" : lambda x,y: -abs(x-y) }
 
 @quantitativescore.register(Constraint)
 def _(stl, x, t):
-    #print(stl,  robusttable[stl.relop](getval(stl.term, x, t), getval(stl.bound, x, t)) )
     return robusttable[stl.relop](getval(stl.term, x, t), getval(stl.bound, x, t))
 
 @quantitativescore.register(Atom)
@@ -170,10 +158,6 @@ def _(stl, x, t):
         return 1
     else:
         return 0
-
-
-
-
 
 @singledispatch
 def smartscore(stl, x, t):
@@ -184,18 +168,15 @@ gamma = 40
 def _(stl, x, t):
     (left, right) = stl.interval
     if left>right:
-        # raise ValueError("Interval [{},{}] empty for {}".format(left, right, stl))    
         return -1
     intervalwidth = right - left +1
     (_, rangetime) = gettime(x, t+left, t+right)
-    #rangetime =  x[(x['time'] <= right) & (x['time'] >= left)]["time"]
     return  2/(1 + math.exp(-gamma * intervalwidth) ) * min([smartscore(stl.subformula, x, t1) for t1 in rangetime], default=1)
 
 @smartscore.register(Future)
 def _(stl, x, t):
     (left, right) = stl.interval
     if left>right:
-        # raise ValueError("Interval [{},{}] empty for {}".format(left, right, stl))
         return -1
     intervalwidth = right - left +1
     (_, rangetime) = gettime(x, t+left, t+right)
@@ -255,10 +236,6 @@ def _(stl, x, t):
 
 
 def gettime(x, left, right):
-    # ts = sorted(x['time'].keys())
     maxtime = x['time'].iloc[-1]#max(x['time'])#ts[-1]
     rangetime =  x.index[(x['time']<= right) & (x['time']>=left)]
-    
-    # rangetime = x['time'].between(left, right).index
-    # rangetime = list(filter(lambda v: (v<= right) & (v >= left), ts))
     return maxtime, rangetime
