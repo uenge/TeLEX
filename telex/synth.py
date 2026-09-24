@@ -46,7 +46,6 @@ def cumscoretracelist(stl, paramvalue, tracelist, scorerfun):
 
 def minscoretracelist(stl, paramvalue, tracelist, scorerfun):
     score = 10000; #proxy for inf, putting inf makes optimizers angry
-    paramlist = parametrizer.getParams(stl)
     stlcand = parametrizer.setParams(stl, paramvalue)
     for trace in tracelist:
         try:
@@ -302,7 +301,7 @@ def postProcess(stlex, pvalue, dirparams, tracelist, scorefun = scorer.quantitat
 
 
 def synthSTLParam(tlStr, tracedir, optmethod="gradient",scorefun=scorer.smartscore, tol = 1e-1):
-    stlex = tstl.parse(tlStr)
+    stlex = stl.parse(tlStr)
     param = parametrizer.getParams(stlex)
     logging.debug("\nTo Synthesize STL Template: {}".format(stlex))
     tracenamelist = find_filenames (tracedir, suffix=".csv")
@@ -327,7 +326,7 @@ def synthSTLParam(tlStr, tracedir, optmethod="gradient",scorefun=scorer.smartsco
 
 def verifySTL(stlex, tracedir):
     #param = parametrizer.getParams(stlex) -- add check that this is empty list
-    logging.debug("Testing STL: {} on trajectories in {} ", stlex, tracedir)
+    logging.debug("Testing STL: {} on trajectories in {} ".format(stlex, tracedir))
     tracenamelist = find_filenames (tracedir, suffix=".csv")
     tracelist = []
     for tracename in tracenamelist:
