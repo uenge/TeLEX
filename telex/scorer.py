@@ -79,7 +79,7 @@ def _(stl, x, t):
 @singledispatch
 
 def getval(term, x, t):
-    raise NotImplementedError("No getval for {} of class {}".format(stl, stl.__class__))
+    raise NotImplementedError("No getval for {} of class {}".format(term, term.__class__))
 
 
 @getval.register(Expr)
@@ -88,7 +88,7 @@ def _(term, x, t):
 
 @getval.register(Var)
 def _(term, x, t):
-    return x[term.name][t]
+    return x[term.name].iloc[t]
 
 @getval.register(Constant)
 def _(term, x, t):
