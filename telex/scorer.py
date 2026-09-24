@@ -260,10 +260,11 @@ def _(stl, x, t):
         return 0
 
 
-
-
 def gettime(x, left, right):
-    ts = sorted(x['time'].keys())
-    maxtime = ts[-1]
-    rangetime = list(filter(lambda v: (v<= right) & (v >= left), ts))
+    # ts = sorted(x['time'].keys())
+    maxtime = x['time'].iloc[-1]#max(x['time'])#ts[-1]
+    rangetime =  x.index[(x['time']<= right) & (x['time']>=left)]
+    
+    # rangetime = x['time'].between(left, right).index
+    # rangetime = list(filter(lambda v: (v<= right) & (v >= left), ts))
     return maxtime, rangetime
