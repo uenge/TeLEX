@@ -197,22 +197,25 @@ def stretchsearch(prm, lbound, ubound, costfunc, pvalue_mut, decinc):
     if c> 0: 
         return pvalue[prm.name]
     epsilon = 0.01
-    while c <= 0 and ubound - lbound > epsilon:
-        pvalue[prm.name] = (ubound + lbound)/2
-        c = costfunc(pvalue)
-        print(c, pvalue)
-        if decinc == "dec":
+    if decinc == "incdec":
+        dirs = ["inc", "dec"]
+    else: 
+        dirs = [decinc]
+    for decinc in dirs:
+        _ubound = ubound
+        _lbound = lbound
+        while c <= 0 and _ubound - _lbound > epsilon:
+            pvalue[prm.name] = (_ubound + _lbound)/2
+            c = costfunc(pvalue)
+            # print(c, pvalue)
             if c >= 0:
                 return pvalue[prm.name]
-            else:
-                ubound = pvalue[prm.name]
-        elif decinc == "inc":
-            if c >= 0:
-                return pvalue[prm.name]
-            else:
-                lbound = pvalue[prm.name]
-        else: 
-            raise ValueError("Strech is incorrect for {}".format(prm.name))
+            if decinc == "dec":
+                _ubound = pvalue[prm.name]
+            elif decinc == "inc":
+                _lbound = pvalue[prm.name]
+            else: 
+                raise ValueError("Strech is incorrect for {}".format(prm.name))
 
     raise ValueError("No value possible for {}".format(prm.name))
 
@@ -264,7 +267,9 @@ def postProcess(stlex, pvalue, dirparams, tracelist):
         #binary search between pvalue[prm.name] and lower/upper from boundlist
         lbound, ubound = boundlist[i]
         i = i + 1
-        if (prm.name,1) in dirparams: #decrease will try to satisfy 
+        if (prm.name,1) in dirparams and (prm.name,-1) in dirparams: #increase or decrease will try to satisfy 
+            prmvalue[prm.name] = stretchsearch(prm, lbound, ubound, costfunc, pvalue, "incdec")
+        elif (prm.name,1) in dirparams: #decrease will try to satisfy 
             prmvalue[prm.name] = stretchsearch(prm, lbound, pvalue[prm.name], costfunc, pvalue, "dec")
         elif (prm.name,-1) in dirparams: #increase will try to satisfy
             prmvalue[prm.name] = stretchsearch(prm, pvalue[prm.name], ubound, costfunc, pvalue, "inc")
@@ -282,6 +287,8 @@ def postProcess(stlex, pvalue, dirparams, tracelist):
         #binary search between pvalue[prm.name] and lower/upper from boundlist
         lbound, ubound = boundlist[i]
         i = i + 1
+        if (prm.name,1) in dirparams and (prm.name, -1) in dirparams: #decrease / increase till possible 
+            continue
         if (prm.name,1) in dirparams: #increase till possible 
             paramvalue[prm.name] = pbinsearch(prm, prmvalue[prm.name], ubound, costfunc, prmvalue, "inc")
         elif (prm.name,-1) in dirparams: #decrease till possible 
@@ -307,9 +314,8 @@ def synthSTLParam(tlStr, tracedir, optmethod="gradient", tol = 1e-1):
 
     pvalue, value, dur = simoptimize(stlex, tracelist, optmethod = optmethod, tol = tol)
     dirparams = parametrizer.getParamsDir(stlex, 0)
-    #print(dirparams)
-    ppvalue = postProcess(stlex, pvalue, dirparams, tracelist) 
-    #print(pvalue, ppvalue)
+    print(f"optimization done: {pvalue}")
+    ppvalue = postProcess(stlex, pvalue, dirparams, tracelist, scorefun) 
     stlsyn = parametrizer.setParams(stlex, ppvalue)
 
     logging.debug("Opt method used: {}".format(optmethod))
