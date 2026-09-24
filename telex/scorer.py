@@ -157,7 +157,7 @@ def _(stl, x, t):
 
 #optable = { "<" : op.lt, ">" : op.gt, "<=" : op.le, ">=" : op.ge, "==": op.eq, "+" : op.add, "-" : op.sub, "*" : op.mul, "/" : op.truediv }
 
-robusttable = { "<" : lambda x,y: y-x, "<=" : lambda x,y: y-x, ">" : lambda x,y: x-y , ">=": lambda x,y: x-y, "==" : lambda x,y: -abs(x,y) }
+robusttable = { "<" : lambda x,y: y-x, "<=" : lambda x,y: y-x, ">" : lambda x,y: x-y , ">=": lambda x,y: x-y, "==" : lambda x,y: -abs(x-y) }
 
 @quantitativescore.register(Constraint)
 def _(stl, x, t):
@@ -238,7 +238,7 @@ def _(stl, x, t):
 def _(stl, x, t):
     return -1 * smartscore(stl.subformula, x, t)
 
-robusttable = { "<" : lambda x,y: y-x, "<=" : lambda x,y: y-x, ">" : lambda x,y: x-y , ">=": lambda x,y: x-y, "==" : lambda x,y: -abs(x,y) }
+robusttable = { "<" : lambda x,y: y-x, "<=" : lambda x,y: y-x, ">" : lambda x,y: x-y , ">=": lambda x,y: x-y, "==" : lambda x,y: -abs(x-y) }
 
 @smartscore.register(Constraint)
 def _(stl, x, t):
