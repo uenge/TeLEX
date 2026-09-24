@@ -250,14 +250,15 @@ def pbinsearch(prm, lbound, ubound, costfunc, pvalue_mut, decinc):
 
     
 
-def postProcess(stlex, pvalue, dirparams, tracelist):
+def postProcess(stlex, pvalue, dirparams, tracelist, scorefun = scorer.quantitativescore):
     prmlist = parametrizer.getParams(stlex)
     prmcount = len(prmlist)
     boundlist = []
     for prm in prmlist:
         boundlist.append((float(prm.left),float(prm.right)))
 
-    costfunc = lambda pvalue : minscoretracelist(stlex,pvalue,tracelist,scorer.quantitativescore)
+    # positive, search for score >0
+    costfunc = lambda pvalue : minscoretracelist(stlex,pvalue,tracelist,scorefun)
 
     
     # expand to ensure all traces satisfy the stl property
@@ -300,8 +301,8 @@ def postProcess(stlex, pvalue, dirparams, tracelist):
     
 
 
-def synthSTLParam(tlStr, tracedir, optmethod="gradient", tol = 1e-1):
-    stlex = stl.parse(tlStr)
+def synthSTLParam(tlStr, tracedir, optmethod="gradient",scorefun=scorer.smartscore, tol = 1e-1):
+    stlex = tstl.parse(tlStr)
     param = parametrizer.getParams(stlex)
     logging.debug("\nTo Synthesize STL Template: {}".format(stlex))
     tracenamelist = find_filenames (tracedir, suffix=".csv")
@@ -312,7 +313,7 @@ def synthSTLParam(tlStr, tracedir, optmethod="gradient", tol = 1e-1):
     #stlsyn = synth.bayesoptimize(stlex, [x,x1], 50, 1, 2, "discrete", steps = 10)
     #stlsyn, value, dur = synth.bayesoptimize(stlex, [x,x1], 100, 1, 2, "continuous")
 
-    pvalue, value, dur = simoptimize(stlex, tracelist, optmethod = optmethod, tol = tol)
+    pvalue, value, dur = simoptimize(stlex, tracelist,scorefun = scorefun, optmethod = optmethod, tol = tol)
     dirparams = parametrizer.getParamsDir(stlex, 0)
     print(f"optimization done: {pvalue}")
     ppvalue = postProcess(stlex, pvalue, dirparams, tracelist, scorefun) 
