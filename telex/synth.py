@@ -55,9 +55,7 @@ def minscoretracelist(stl, paramvalue, tracelist, scorerfun):
         score = min(score, quantscore) 
     return score
 
-
-
-def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', tol = 1e-1):
+def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', tol = 1e-1, seed = None):
     prmlist = parametrizer.getParams(stl)
     prmcount = len(prmlist)
     lb = np.zeros((prmcount,))
@@ -79,18 +77,18 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
     while not done and attempts < 10:
         attempts = attempts + 1
         if optmethod == "nogradient":
-            res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol)
+            res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol, seed = seed)
         elif optmethod == "dualannealing":
-            res = scipy.optimize.dual_annealing(costfunc, bounds=boundlist)
+            res = scipy.optimize.dual_annealing(costfunc, bounds=boundlist, seed = seed)
         elif optmethod == 'HYBRID':
             if attempts % 2 == 0:
                 res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,method='L-BFGS-B',options=options)
             else:
                 res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,method='TNC',options=options)
         elif optmethod == 'DE':
-            res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol)
+            res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol, seed = seed)
         else:
-            res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,method=optmethod,options=options)
+            res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,method=optmethod,options=options, seed = seed)
 
         logging.debug("Attempt : {} with Cost: {}/{} Param: {}".format(attempts, res.fun, bestCost, res.x))
         if res.fun > 1.01* bestCost and res.fun < 0.99 * bestCost:
