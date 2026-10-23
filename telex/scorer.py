@@ -163,7 +163,7 @@ def _(stl, x, t):
 def smartscore(stl, x, t):
     raise NotImplementedError("No smartscore for {} of class {}".format(stl, stl.__class__))
 
-gamma = 40
+gamma = 2
 @smartscore.register(Globally)
 def _(stl, x, t):
     (left, right) = stl.interval
