@@ -5,7 +5,7 @@ import telex.inputreader as inputreader
 #import bayesopt
 import numpy as np
 import scipy.optimize 
-from random import uniform
+import random
 import logging
 import time
 import os 
@@ -55,13 +55,14 @@ def minscoretracelist(stl, paramvalue, tracelist, scorerfun):
         score = min(score, quantscore) 
     return score
 
-def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', tol = 1e-1, seed = None):
+def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='DE', tol = 1e-1, seed = None):
+    random.seed(seed)
     prmlist = parametrizer.getParams(stl)
     prmcount = len(prmlist)
     lb = np.zeros((prmcount,))
     ub = np.ones((prmcount,))
     boundlist = []
-    uniform_tuple = lambda t: uniform(*t)
+    uniform_tuple = lambda t: random.uniform(*t)
     for prm in prmlist:
         boundlist.append((float(prm.left),float(prm.right)))
     start = time.perf_counter()
@@ -73,12 +74,10 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
     initguess = map(uniform_tuple, boundlist)
     logging.debug("Initial guess in simoptimize : {} ".format(initguess))
     bestCost = 0
-    options={'gtol': tol, 'disp': False}
+    options={'gtol': tol, 'disp': False, 'seed': seed}
     while not done and attempts < 10:
         attempts = attempts + 1
-        if optmethod == "nogradient":
-            res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol, seed = seed)
-        elif optmethod == "dualannealing":
+        if optmethod == "dualannealing":
             res = scipy.optimize.dual_annealing(costfunc, bounds=boundlist, seed = seed)
         elif optmethod == 'HYBRID':
             if attempts % 2 == 0:
@@ -88,7 +87,7 @@ def simoptimize(stl, tracelist,scorefun=scorer.smartscore,optmethod='HYBRID', to
         elif optmethod == 'DE':
             res = scipy.optimize.differential_evolution(costfunc, bounds = boundlist, tol = tol, seed = seed)
         else:
-            res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,method=optmethod,options=options, seed = seed)
+            res = scipy.optimize.minimize(costfunc, initguess, bounds=boundlist,method=optmethod,options=options)
 
         logging.debug("Attempt : {} with Cost: {}/{} Param: {}".format(attempts, res.fun, bestCost, res.x))
         if res.fun > 1.01* bestCost and res.fun < 0.99 * bestCost:
@@ -273,9 +272,6 @@ def postProcess(stlex, pvalue, dirparams, tracelist, scorefun = scorer.quantitat
             prmvalue[prm.name] = stretchsearch(prm, pvalue[prm.name], ubound, costfunc, pvalue, "inc")
         else:
             raise ValueError("Can't synthesize equality parameter: {}".format(prm.name))
-
-    
-   
     #prmvalue  = pvalue
 
     # contract till all traces still satisfy the stl property
